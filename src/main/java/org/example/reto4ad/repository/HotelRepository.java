@@ -1,4 +1,10 @@
 package org.example.reto4ad.repository;
 
-public class HotelRepository {
+import org.example.reto4ad.Hotel;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository // Opcional, pero buena práctica
+public interface HotelRepository extends MongoRepository<Hotel, String> {
+
 }
