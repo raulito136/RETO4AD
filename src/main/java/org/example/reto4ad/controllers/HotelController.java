@@ -100,4 +100,10 @@ public class HotelController {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body("Booking confirmed for hotel ID: " + reserva.getHotelId());
     }
+
+    @GetMapping("/auth/check")
+    public ResponseEntity<Void> checkAuth() {
+        // Si el flujo llega aquí, es que el usuario está autenticado
+        return ResponseEntity.ok().build();
+    }
 }

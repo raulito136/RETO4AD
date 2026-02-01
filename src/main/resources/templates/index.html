@@ -9,7 +9,13 @@
 </head>
 <body>
 <header>
-    <h1>Sistema de Gestión Hotelera</h1>
+    <div class="header-container" style="display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: auto; padding: 0 1rem;">
+        <h1>Sistema de Gestión Hotelera</h1>
+        <div id="authSection">
+            <button id="btnLoginNav" class="secondary" onclick="mostrarLogin()" style="width: auto;">Iniciar Sesión</button>
+            <button id="btnLogoutNav" class="secondary" onclick="cerrarSesion()" style="display: none; width: auto; background: #475569;">Cerrar Sesión</button>
+        </div>
+    </div>
 </header>
 
 <main class="container">
@@ -74,7 +80,22 @@
         </aside>
     </div>
 </main>
+<div id="loginModal" class="modal-overlay" style="display: none;">
+    <div class="card modal-content">
+        <h2>Iniciar Sesión</h2>
+        <p>Esta acción requiere autenticación.</p>
+        <form id="loginForm">
+            <label>Usuario:</label>
+            <input type="text" id="username" required>
+            <label>Contraseña:</label>
+            <input type="password" id="password" required>
+            <div class="row">
+                <button type="submit" class="primary">Entrar</button>
+                <button type="button" class="secondary" onclick="cerrarModal()">Cancelar</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-<script src="script.js"></script>
 </body>
 </html>
