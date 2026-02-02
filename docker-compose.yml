@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: reto4ad_app
+    ports:
+      - "8080:8080"
+    environment:
+      # Pasamos la URL de Atlas como variable de entorno
+      - SPRING_MONGODB_URI=mongodb+srv://root:root@cluster0.jj7aikx.mongodb.net/?appName=Cluster0
+      - SPRING_MONGODB_DATABASE=hoteles
+    restart: always
