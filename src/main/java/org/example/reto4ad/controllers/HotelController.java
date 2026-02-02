@@ -1,5 +1,6 @@
 package org.example.reto4ad.controllers;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.reto4ad.entities.Hotel;
 import org.example.reto4ad.repository.HotelRepository;
 import org.example.reto4ad.entities.Reserva;
@@ -14,6 +15,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/hoteles")
+@Tag(name = "Gestión de Hoteles", description = "API para la administración de hoteles y reservas")
 public class HotelController {
 
     @Autowired
