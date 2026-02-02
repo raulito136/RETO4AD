@@ -7,7 +7,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      # Pasamos la URL de Atlas como variable de entorno
-      - SPRING_MONGODB_URI=mongodb+srv://root:root@cluster0.jj7aikx.mongodb.net/?appName=Cluster0
-      - SPRING_MONGODB_DATABASE=hoteles
+      # Añadimos DATA para que coincida con la propiedad de Spring
+      - SPRING_DATA_MONGODB_URI=mongodb+srv://root:root@cluster0.jj7aikx.mongodb.net/hoteles?retryWrites=true&w=majority
+      - SPRING_DATA_MONGODB_DATABASE=hoteles
     restart: always
