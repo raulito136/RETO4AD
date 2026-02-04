@@ -1,4 +1,4 @@
-package org.example.reto4ad.securities;
+package org.example.reto4ad.configuracion;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +30,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/hoteles/buscar").permitAll()
                         .anyRequest().authenticated()
                 )
+                .httpBasic(Customizer.withDefaults())
                 .formLogin(form -> form
                         .loginPage("/index.html")
                         .loginProcessingUrl("/login")

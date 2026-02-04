@@ -1,11 +1,14 @@
 package org.example.reto4ad.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.reto4ad.entities.Hotel;
-import org.example.reto4ad.repository.HotelRepository;
 import org.example.reto4ad.entities.Reserva;
 import org.example.reto4ad.exceptions.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.example.reto4ad.services.HotelService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,79 +18,85 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/hoteles")
-@Tag(name = "Gestión de Hoteles", description = "API para la administración de hoteles y reservas")
+@Tag(name = "1. Gestión de Hoteles", description = "Operaciones principales para la administración de hoteles")
 public class HotelController {
 
-    @Autowired
-    private HotelRepository hotelRepository;
+    private final HotelService hotelService;
 
-    @GetMapping
-    public List<Hotel> getAllHotels() {
-        return hotelRepository.findAll();
+    public HotelController(HotelService hotelService) {
+        this.hotelService = hotelService;
     }
 
+    @Operation(summary = "Listar todos los hoteles", description = "Obtiene una lista completa de los hoteles disponibles.")
+    @GetMapping
+    public List<Hotel> getAllHotels() {
+        return hotelService.findAll();
+    }
+
+    @Operation(summary = "Obtener hotel por ID", description = "Busca un hotel específico mediante su ID de MongoDB.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Hotel encontrado"),
+            @ApiResponse(responseCode = "404", description = "Hotel no encontrado")
+    })
     @GetMapping("/{id}")
     public Hotel getHotelById(@PathVariable String id) {
-        return hotelRepository.findById(id)
+        return hotelService.findById(id)
                 .orElseThrow(() -> new HotelNotFoundException(id));
     }
 
+    @Operation(summary = "Crear un nuevo hotel")
     @PostMapping
     public ResponseEntity<Hotel> createHotel(@RequestBody Hotel hotel) {
-        if (hotel.getNombre() == null || hotel.getNombre().isEmpty()) {
-            throw new InvalidBookingRequestException("Hotel name is required");
-        }
-        Hotel savedHotel = hotelRepository.save(hotel);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedHotel);
+        return ResponseEntity.status(HttpStatus.CREATED).body(hotelService.save(hotel));
     }
 
+    @Operation(summary = "Actualizar un hotel", description = "Actualiza los datos de un hotel existente.")
     @PutMapping("/{id}")
-    public Hotel updateHotel(@PathVariable String id, @RequestBody Hotel hotelDetails) {
-        return hotelRepository.findById(id)
-                .map(hotel -> {
-                    hotel.setNombre(hotelDetails.getNombre());
-                    hotel.setCalificacion(hotelDetails.getCalificacion());
-                    hotel.setUbicacion(hotelDetails.getUbicacion());
-                    hotel.setPrecioPorNoche(hotelDetails.getPrecioPorNoche());
-                    hotel.setEstrellas(hotelDetails.getEstrellas());
-                    return hotelRepository.save(hotel);
+    public Hotel updateHotel(@PathVariable String id, @RequestBody Hotel hotel) {
+        return hotelService.findById(id)
+                .map(existingHotel -> {
+                    hotel.setId(id);
+                    return hotelService.save(hotel);
                 })
                 .orElseThrow(() -> new HotelNotFoundException(id));
     }
 
+    @Operation(summary = "Eliminar un hotel")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteHotel(@PathVariable String id) {
-        Hotel hotel = hotelRepository.findById(id)
-                .orElseThrow(() -> new HotelNotFoundException(id));
-
-        hotelRepository.delete(hotel);
+        hotelService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/estrellas/{minimo}")
-    public List<Hotel> getHotelsByMinStars(@PathVariable Integer minimo) {
-        if (minimo < 0 || minimo > 5) {
-            throw new InvalidParameterFormatException("Parametro invalido");
-        }
-        return hotelRepository.findAll().stream()
-                .filter(h -> h.getEstrellas() != null && h.getEstrellas() >= minimo)
-                .collect(Collectors.toList());
-    }
-
-    @GetMapping("/buscar")
-    public List<Hotel> getHotelsByLocation(@RequestParam(required = false) String ubicacion) {
+    @Tag(name = "2. Filtros y Búsquedas", description = "Consultas avanzadas por atributos")
+    @Operation(summary = "Filtrar por ubicación", description = "Busca hoteles que contengan el texto en su ubicación.")
+    @GetMapping("/busqueda")
+    public List<Hotel> getHotelsByLocation(@Parameter(description = "Ciudad o zona") @RequestParam(required = false) String ubicacion) {
         if (ubicacion == null || ubicacion.trim().isEmpty()) {
             throw new MissingRequiredParameterException("ubicacion");
         }
-        return hotelRepository.findAll().stream()
+        return hotelService.findAll().stream()
                 .filter(h -> h.getUbicacion() != null &&
                         h.getUbicacion().toLowerCase().contains(ubicacion.toLowerCase()))
                 .collect(Collectors.toList());
     }
 
+    @Operation(summary = "Filtrar por calificación exacta")
+    @GetMapping("/calificacion/{calificacion}")
+    public List<Hotel> getHotelsByCalificacion(@PathVariable Double calificacion){
+        return hotelService.findHotelesByCalificacion(calificacion);
+    }
+
+    @Operation(summary = "Filtrar por precio", description = "Busca hoteles por un precio específico por noche.")
+    @GetMapping("/precio/{precio}")
+    public List<Hotel> getHotelsByPrecioNoche(@PathVariable Double precio) {
+        return hotelService.findHotelesByPrecioNoche(precio);
+    }
+
+    @Tag(name = "3. Reservas", description = "Operaciones de reservas de habitaciones")
+    @Operation(summary = "Crear reserva", description = "Registra una reserva validando la existencia del hotel.")
     @PostMapping("/reservas")
     public ResponseEntity<String> createReserva(@RequestBody Reserva reserva) {
-        // Validación de datos de entrada
         if (reserva.getHotelId() == null) {
             throw new MissingRequiredParameterException("hotelId");
         }
@@ -95,17 +104,16 @@ public class HotelController {
             throw new InvalidBookingRequestException("Number of nights must be greater than zero");
         }
 
-        // Verificamos si el hotel existe antes de permitir la reserva
-        hotelRepository.findById(reserva.getHotelId())
+        hotelService.findById(reserva.getHotelId())
                 .orElseThrow(() -> new HotelNotFoundException(reserva.getHotelId()));
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body("Booking confirmed for hotel ID: " + reserva.getHotelId());
     }
 
+    @Operation(summary = "Comprobar autenticación", hidden = true)
     @GetMapping("/auth/check")
     public ResponseEntity<Void> checkAuth() {
-        // Si el flujo llega aquí, es que el usuario está autenticado
         return ResponseEntity.ok().build();
     }
 }
