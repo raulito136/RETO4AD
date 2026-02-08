@@ -10,7 +10,7 @@ import java.util.Optional;
 @Service
 public class HotelService {
 
-    HotelRepository hotelRepository;
+    private final HotelRepository hotelRepository;
 
     public HotelService(HotelRepository hotelRepository) {
         this.hotelRepository = hotelRepository;
@@ -29,7 +29,7 @@ public class HotelService {
     }
 
     public void deleteById(String id) {
-        hotelRepository.deleteById(id);
+       hotelRepository.deleteById(id);
     }
 
     public List<Hotel> findHotelesByCalificacion(Double calificacion){
