@@ -10,6 +10,9 @@ import java.util.Optional;
 @Repository
 public interface HotelRepository extends MongoRepository<Hotel, String> {
 
+
+
+
     List<Hotel> findHotelsByCalificacion(Double calificacion);
 
     List<Hotel> findHotelsByCalificacionAfter(Double calificacionAfter);

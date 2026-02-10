@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/hoteles")
-@Tag(name = "1. Gestión de Hoteles", description = "Operaciones principales para la administración de hoteles")
 public class HotelController {
 
     private final HotelService hotelService;
@@ -27,12 +26,14 @@ public class HotelController {
         this.hotelService = hotelService;
     }
 
+    @Tag(name = "1. Gestión de Hoteles")
     @Operation(summary = "Listar todos los hoteles", description = "Obtiene una lista completa de los hoteles disponibles.")
     @GetMapping
     public List<Hotel> getAllHotels() {
         return hotelService.findAll();
     }
 
+    @Tag(name = "1. Gestión de Hoteles")
     @Operation(summary = "Obtener hotel por ID", description = "Busca un hotel específico mediante su ID de MongoDB.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Hotel encontrado"),
@@ -44,12 +45,14 @@ public class HotelController {
                 .orElseThrow(() -> new HotelNotFoundException(id));
     }
 
+    @Tag(name = "1. Gestión de Hoteles")
     @Operation(summary = "Crear un nuevo hotel")
     @PostMapping
     public ResponseEntity<Hotel> createHotel(@RequestBody Hotel hotel) {
         return ResponseEntity.status(HttpStatus.CREATED).body(hotelService.save(hotel));
     }
 
+    @Tag(name = "1. Gestión de Hoteles")
     @Operation(summary = "Actualizar un hotel", description = "Actualiza los datos de un hotel existente.")
     @PutMapping("/{id}")
     public Hotel updateHotel(@PathVariable String id, @RequestBody Hotel hotel) {
@@ -61,14 +64,16 @@ public class HotelController {
                 .orElseThrow(() -> new HotelNotFoundException(id));
     }
 
+    @Tag(name = "1. Gestión de Hoteles")
     @Operation(summary = "Eliminar un hotel")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteHotel(@PathVariable String id) {
+    public void deleteHotel(@PathVariable String id) {
+        hotelService.findById(id)
+                .orElseThrow(() -> new HotelNotFoundException(id));
         hotelService.deleteById(id);
-        return ResponseEntity.noContent().build();
     }
 
-    @Tag(name = "2. Filtros y Búsquedas", description = "Consultas avanzadas por atributos")
+    @Tag(name = "2. Filtros y Búsquedas")
     @Operation(summary = "Filtrar por ubicación", description = "Busca hoteles que contengan el texto en su ubicación.")
     @GetMapping("/busqueda")
     public List<Hotel> getHotelsByLocation(@Parameter(description = "Ciudad o zona") @RequestParam(required = false) String ubicacion) {
@@ -81,19 +86,56 @@ public class HotelController {
                 .collect(Collectors.toList());
     }
 
+    @Tag(name = "2. Filtros y Búsquedas")
     @Operation(summary = "Filtrar por calificación exacta")
     @GetMapping("/calificacion/{calificacion}")
     public List<Hotel> getHotelsByCalificacion(@PathVariable Double calificacion){
         return hotelService.findHotelesByCalificacion(calificacion);
     }
 
+    @Tag(name = "2. Filtros y Búsquedas")
     @Operation(summary = "Filtrar por precio", description = "Busca hoteles por un precio específico por noche.")
     @GetMapping("/precio/{precio}")
     public List<Hotel> getHotelsByPrecioNoche(@PathVariable Double precio) {
         return hotelService.findHotelesByPrecioNoche(precio);
     }
 
-    @Tag(name = "3. Reservas", description = "Operaciones de reservas de habitaciones")
+    @Tag(name = "2. Filtros y Búsquedas")
+    @Operation(summary = "Filtrar por precio superior a", description ="Busca hoteles por un precio superior por noche.")
+    @GetMapping("/precio/superior/{precio}")
+    public List<Hotel> getHotelsbyPrecioNocheSuperiorA(@PathVariable Double precio){
+        return hotelService.findHotelesByPrecioNocheSuperiorA(precio);
+    }
+
+    @Tag(name = "2. Filtros y Búsquedas")
+    @Operation(summary = "Filtrar por precio inferior a", description ="Busca hoteles por un precio inferior por noche.")
+    @GetMapping("/precio/inferior/{precio}")
+    public List<Hotel> getHotelsbyPrecioNocheInferiorA(@PathVariable Double precio){
+        return hotelService.findHotelesByPrecioNocheInferiorA(precio);
+    }
+
+    @Tag(name = "2. Filtros y Búsquedas")
+    @Operation(summary = "Filtrar por calificación superior a", description ="Busca hoteles por una calificación superior.")
+    @GetMapping("/calificacion/superior/{calificacion}")
+    public List<Hotel> getHotelsByCalificacionSuperiorA(@PathVariable Double calificacion){
+        return hotelService.findHotelesByCalificacionSuperiorA(calificacion);
+    }
+
+    @Tag(name = "2. Filtros y Búsquedas")
+    @Operation(summary = "Filtrar por calificación inferior a", description ="Busca hoteles por una calificación inferior")
+    @GetMapping("/calificacion/inferior/{calificacion}")
+    public List<Hotel> getHotelsByCalificacionInferiorA(@PathVariable Double calificacion){
+        return hotelService.findHotelesByCalificacionInferiorA(calificacion);
+    }
+
+    @Tag(name = "2. Filtros y Búsquedas")
+    @Operation(summary = "Filtrar por nombre", description ="Busca hoteles por un nombre específico.")
+    @GetMapping("/nombre/{nombre}")
+    public Hotel getHotelsByNombre(@PathVariable String nombre){
+        return hotelService.findHotelesByNombre(nombre).orElseThrow(() -> new HotelNotFoundException(nombre));
+    }
+
+    @Tag(name = "3. Reservas")
     @Operation(summary = "Crear reserva", description = "Registra una reserva validando la existencia del hotel.")
     @PostMapping("/reservas")
     public ResponseEntity<String> createReserva(@RequestBody Reserva reserva) {
