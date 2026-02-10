@@ -1,4 +1,4 @@
-package org.example.reto4ad.configuracion;
+package org.example.reto4ad.security;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

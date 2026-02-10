@@ -1,12 +1,15 @@
-package org.example.reto4ad.configuracion;
+package org.example.reto4ad.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.reto4ad.dto.ErrorResponseDTO;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -30,16 +33,17 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/hoteles/buscar").permitAll()
                         .anyRequest().authenticated()
                 )
-                .httpBasic(Customizer.withDefaults())
+                .httpBasic( (basic) ->{
+                    basic.authenticationEntryPoint(customAuthenticationEntryPoint());
+                })
                 .formLogin(form -> form
                         .loginPage("/index.html")
                         .loginProcessingUrl("/login")
-                        // NUEVO: Manejadores para AJAX
                         .successHandler((request, response, authentication) -> {
-                            response.setStatus(HttpServletResponse.SC_OK); // Devuelve 200 en vez de 302
+                            response.setStatus(HttpServletResponse.SC_OK);
                         })
                         .failureHandler((request, response, exception) -> {
-                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // Devuelve 401 en vez de 302
+                            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                         })
                         .permitAll()
                 )
@@ -60,14 +64,17 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
-        // Definimos un usuario en memoria para pruebas
-        UserDetails user = User.withDefaultPasswordEncoder()
-                .username("admin")      // Este será tu usuario
-                .password("1234")       // Esta será tu contraseña
-                .roles("USER")          // Rol asignado
-                .build();
-
-        return new InMemoryUserDetailsManager(user);
+    public AuthenticationEntryPoint customAuthenticationEntryPoint() {
+        return (request, response, e) -> {
+            response.setContentType("application/json");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            ErrorResponseDTO error = new ErrorResponseDTO(
+                    "Usuario no autorizado",
+                    "El usuario y contraseña no coinciden",
+                    401
+            );
+            ObjectMapper mapper = new ObjectMapper();
+            response.getWriter().write(mapper.writeValueAsString(error));
+        };
     }
 }
