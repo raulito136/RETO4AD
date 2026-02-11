@@ -46,15 +46,15 @@ public class HotelService {
     }
 
     public List<Hotel> findHotelesByPrecioNoche(Double precio){
-        return hotelRepository.findHotelsByCalificacion(precio);
+        return hotelRepository.findHotelsByPrecioPorNoche(precio);
     }
 
     public List<Hotel> findHotelesByPrecioNocheSuperiorA(Double precio){
-        return hotelRepository.findHotelsByCalificacionAfter(precio);
+        return hotelRepository.findHotelsByPrecioPorNocheAfter(precio);
     }
 
     public List<Hotel> findHotelesByPrecioNocheInferiorA(Double precio){
-        return hotelRepository.findHotelsByCalificacionBefore(precio);
+        return hotelRepository.findHotelsByPrecioPorNocheBefore(precio);
     }
 
     public Optional<Hotel> findHotelesByNombre(String nombre){

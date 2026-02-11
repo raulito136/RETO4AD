@@ -143,19 +143,14 @@ public class HotelController {
             throw new MissingRequiredParameterException("hotelId");
         }
         if (reserva.getNoches() == null || reserva.getNoches() <= 0) {
-            throw new InvalidBookingRequestException("Number of nights must be greater than zero");
+            throw new InvalidBookingRequestException("Numeros de noches deben ser mayores a 0");
         }
 
-        hotelService.findById(reserva.getHotelId())
+        Hotel hotel=hotelService.findById(reserva.getHotelId())
                 .orElseThrow(() -> new HotelNotFoundException(reserva.getHotelId()));
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body("Booking confirmed for hotel ID: " + reserva.getHotelId());
+                .body("Reserva confirmada para el hotel: " +hotel.getNombre());
     }
 
-    @Operation(summary = "Comprobar autenticación", hidden = true)
-    @GetMapping("/auth/check")
-    public ResponseEntity<Void> checkAuth() {
-        return ResponseEntity.ok().build();
-    }
 }

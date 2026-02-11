@@ -20,4 +20,7 @@ public interface HotelRepository extends MongoRepository<Hotel, String> {
     List<Hotel> findHotelsByCalificacionBefore(Double calificacionBefore);
 
     Optional<Hotel> findHotelsByNombre(String nombre);
+    List<Hotel> findHotelsByPrecioPorNoche(Double precio);
+    List<Hotel> findHotelsByPrecioPorNocheAfter(Double precio);
+    List<Hotel> findHotelsByPrecioPorNocheBefore(Double precio);
 }
