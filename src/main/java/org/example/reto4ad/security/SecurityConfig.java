@@ -6,34 +6,46 @@ import org.example.reto4ad.dto.ErrorResponseDTO;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
+/**
+ * Configuración principal de seguridad de la aplicación.
+ * Define las políticas de autorización, el manejo de sesiones, la seguridad de las rutas
+ * y la integración de la autenticación básica y mediante formulario.
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // En SecurityConfig.java
+    /**
+     * Configura la cadena de filtros de seguridad (SecurityFilterChain).
+     * - Desactiva CSRF para facilitar el uso de la API REST.
+     * - Define rutas públicas (Swagger, recursos estáticos, listado de hoteles).
+     * - Obliga a estar autenticado para cualquier otra petición.
+     * * @param http Objeto de configuración de seguridad HTTP.
+     * @return El filtro de seguridad configurado.
+     * @throws Exception Si ocurre un error durante la configuración.
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        // Permite acceso sin login a la documentación de API
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        // Permite acceso a recursos estáticos del frontend
                         .requestMatchers("/", "/index.html", "/css/**", "/javascript/**", "/favicon.ico", "/error").permitAll()
+                        // Permite ver hoteles y detalles sin estar logueado
                         .requestMatchers(HttpMethod.GET, "/hoteles").permitAll()
                         .requestMatchers(HttpMethod.GET, "/hoteles/{id}").permitAll()
                         .requestMatchers(HttpMethod.GET, "/hoteles/buscar").permitAll()
+                        // Cualquier otra operación (POST, PUT, DELETE) requiere autenticación
                         .anyRequest().authenticated()
                 )
-                .httpBasic( (basic) ->{
+                .httpBasic( (basic) -> {
                     basic.authenticationEntryPoint(customAuthenticationEntryPoint());
                 })
                 .formLogin(form -> form
@@ -63,6 +75,12 @@ public class SecurityConfig {
         return http.build();
     }
 
+    /**
+     * Define un punto de entrada personalizado para capturar errores de autenticación.
+     * Devuelve una respuesta en formato JSON utilizando el ErrorResponseDTO
+     * en lugar del error por defecto de Spring.
+     * * @return Una instancia de AuthenticationEntryPoint.
+     */
     @Bean
     public AuthenticationEntryPoint customAuthenticationEntryPoint() {
         return (request, response, e) -> {
