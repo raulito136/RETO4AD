@@ -41,7 +41,21 @@ El sistema implementa un modelo de seguridad robusto configurado en `SecurityCon
 | **POST** | `/hoteles` | Crea un nuevo hotel (Protegido). |
 | **PUT** | `/hoteles/{id}` | Actualiza un hotel existente (Protegido). |
 | **DELETE** | `/hoteles/{id}` | Elimina un hotel del sistema (Protegido). |
-
+**Ejemplo de crear un hotel (POST):**
+```bash
+curl -X 'POST' \
+  'http://localhost:8080/hoteles' \
+  -H 'accept: */*' \
+  -H 'Authorization: Basic dXN1YXJpbzoxMjM0' \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "nombre": "Cesur Hotel",
+  "calificacion": 8,
+  "ubicacion": "El palo",
+  "precioPorNoche": 500,
+  "estrellas": 5
+}'
+ ```
 ### 2. Filtros y Búsquedas Avanzadas
 
 | Método | Endpoint | Descripción |
@@ -53,13 +67,32 @@ El sistema implementa un modelo de seguridad robusto configurado en `SecurityCon
 | **GET** | `/hoteles/precio/superior/{precio}` | Busca hoteles con precio > valor. |
 | **GET** | `/hoteles/precio/inferior/{precio}` | Busca hoteles con precio < valor. |
 
+**Ejemplo de busqueda de nombre de hotel (GET):**
+```json
+{
+  "id": "698cca4431d9501c657db778",
+  "nombre": "Cesur Hotel",
+  "calificacion": 8,
+  "ubicacion": "El palo",
+  "precioPorNoche": 500,
+  "estrellas": 5
+}
+ ```
 ### 3. Reservas (`/hoteles/reservas`)
 
 | Método | Endpoint | Descripción |
 | :--- | :--- | :--- |
 | **POST** | `/hoteles/reservas` | Crea una reserva validando hotel y noches. |
 
+**Ejemplo de reserva (POST):**
+```json
+{
+  "mensaje": "Reserva confirmada para el hotel: Eurostars Hotel Real"
+  }
+ ```
 ---
+
+
 
 ## ⚠️ Manejo de Errores Centralizado
 
